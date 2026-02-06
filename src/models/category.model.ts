@@ -1,9 +1,7 @@
-import { model, models, Schema } from "mongoose";
+import { Model, model, models, Schema } from "mongoose";
 
 type FoodCategory = {
   categoryName: String;
-  createdAt: Date;
-  updatedAt: Date;
 };
 
 export const foodCategorySchema = new Schema<FoodCategory>(
@@ -13,5 +11,5 @@ export const foodCategorySchema = new Schema<FoodCategory>(
   { timestamps: true },
 );
 
-export const FoodCategoryModel =
+export const FoodCategoryModel: Model<FoodCategory> =
   models["Categories"] || model<FoodCategory>("Categories", foodCategorySchema);

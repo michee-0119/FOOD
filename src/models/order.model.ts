@@ -1,4 +1,4 @@
-import { model, models, ObjectId, Schema } from "mongoose";
+import { Model, model, models, ObjectId, Schema } from "mongoose";
 
 enum FoodOrderStatus {
   PENDING = "PENDING",
@@ -38,5 +38,5 @@ export const FoodOrderSchema = new Schema<FoodOrder>(
   { timestamps: true },
 );
 
-export const FoodOrderModel =
+export const FoodOrderModel: Model<FoodOrder> =
   models["Orders"] || model("Orders", FoodOrderSchema);

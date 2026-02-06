@@ -1,25 +1,48 @@
 import { Request, Response } from "express";
 import { UserModel } from "../../models";
+import { verifyUserEmail } from "../../utils/mail-utils";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export const signUpController = async (req: Request, res: Response) => {
   try {
-    const { email, password, phoneNumber, address, role } = req.body;
-    //test123456
+    const { email, password } = req.body;
+
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: true,
+        message: "This user is found",
+      });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log(hashedPassword);
-
-    const user = await UserModel.create({
+    const newUser = await UserModel.create({
       email,
       password: hashedPassword,
-      phoneNumber,
-      address,
-      role,
     });
-    res.status(200).send({ message: "user created successfully", data: user });
+
+    const token = jwt.sign({ email }, process.env.JWT_SECRET!, {
+      expiresIn: 600,
+    });
+
+    await verifyUserEmail(
+      email,
+      `${process.env.TEST_API}/users/verify-user?token=${token}`,
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "Verification email sent",
+      data: newUser,
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ message: "error creating user", error: error });
+
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+      error,
+    });
   }
 };

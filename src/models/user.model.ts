@@ -1,4 +1,4 @@
-import { Model, model, models, ObjectId, Schema } from "mongoose";
+import { Model, models, model, Schema, Types } from "mongoose";
 
 enum UserRole {
   USER = "USER",
@@ -11,9 +11,9 @@ type User = {
   phoneNumber: string;
   address: string;
   role: UserRole;
-  orderedFoods: ObjectId[];
+  orderedFoods: Types.ObjectId[];
   ttl: Date;
-  isVerified: Boolean;
+  isVerified: boolean;
 };
 
 const UserSchema = new Schema<User>(
@@ -26,14 +26,23 @@ const UserSchema = new Schema<User>(
       type: String,
       enum: Object.values(UserRole),
       default: UserRole.USER,
-      required: true,
     },
-    orderedFoods: [{ type: Schema.Types.ObjectId, required: true }],
-    ttl: { type: Date, required: true },
-    isVerified: { type: Boolean, required: true },
+    orderedFoods: {
+      type: [Schema.Types.ObjectId],
+      ref: "Food",
+      default: [],
+    },
+    ttl: {
+      type: Date,
+      default: () => new Date(Date.now() + 1000 * 60 * 60),
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );
 
 export const UserModel: Model<User> =
-  models["Users"] || model("Users", UserSchema);
+  models.Users || model<User>("Users", UserSchema);
